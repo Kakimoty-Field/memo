@@ -166,7 +166,7 @@ postgreSQL 接続テストの実際のパターンを設定します。
 指定したデータベースに接続し、クエリを実行して、セッションを切断します。
 
 AWS の コンソール側で、DB接続(カウント)を確認した例です。
-![](./img/300.png)
+![](https://raw.githubusercontent.com/Kakimoty-Field/memo/main/tsung/img/300.png)
 
 # tsung でのレポート
 ※ 後日
