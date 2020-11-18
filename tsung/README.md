@@ -1,7 +1,14 @@
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
 <!-- code_chunk_output -->
 
+- [変更履歴](#変更履歴)
 - [初めに](#初めに)
 - [実行環境準備](#実行環境準備)
+  - [OSチューニング](#osチューニング)
+    - [TCP](#tcp)
+    - [ファイルディスクリプタ上限](#ファイルディスクリプタ上限)
   - [tsung セットアップ](#tsung-セットアップ)
 - [負荷テストしてみる](#負荷テストしてみる)
   - [非分散負荷 (Client / Server)](#非分散負荷-client-server)
@@ -20,6 +27,9 @@
 
 <!-- /code_chunk_output -->
 
+# 変更履歴
+2020.11.18 初稿
+2020.11.18 OS チューニング追加
 
 # 初めに
 
@@ -32,6 +42,35 @@
 - [tsung](http://tsung.erlang-projects.org/)
 
 - [Amazon EC2](https://aws.amazon.com/jp/ec2/) (Amazon Linux 2)
+
+## OSチューニング
+接続先サーバに対して大量のセッションを張ることになりますが、OSの制限に引っかかることがあるため、各種設定変更しておきます。
+
+[※公式ドキュメント 10.3 Why do i have error_connect_emfile errors?](http://tsung.erlang-projects.org/user_manual/faq.html#why-do-i-have-error-connect-emfile-errors)
+### TCP 
+
+**/etc/sysctl.conf** に設定を追加、または設定変更します。
+
+```conf:/etc/sysctl.conf
+  .
+  .
+  .
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.ip_local_port_range = 1024 65000
+fs.file-max = 65000
+```
+
+### ファイルディスクリプタ上限
+
+**/etc/sysctl.conf** に設定を追加、または設定変更します。
+
+```conf:/etc/sysctl.conf
+  .
+  .
+  .
+*	soft	nofile	65000
+*	hard	nofile	65000
+```
 
 ## tsung セットアップ
 tsung 用に新しく EC2 インスタンスを作成した場合、tsung は **epel** に含まれているということなので Amazon Liunx で **epel** を使えるようにします。
