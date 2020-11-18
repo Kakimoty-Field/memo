@@ -1,3 +1,26 @@
+<!-- code_chunk_output -->
+
+- [初めに](#初めに)
+- [実行環境準備](#実行環境準備)
+  - [tsung セットアップ](#tsung-セットアップ)
+- [負荷テストしてみる](#負荷テストしてみる)
+  - [非分散負荷 (Client / Server)](#非分散負荷-client-server)
+  - [負荷の設定 (load)](#負荷の設定-load)
+    - [第１フェーズ](#第1フェーズ)
+      - [arrivalphase](#arrivalphase)
+      - [users](#users)
+    - [第２フェーズ](#第2フェーズ)
+      - [arrivalphase](#arrivalphase-1)
+      - [users](#users-1)
+  - [HTTP アクセス](#http-アクセス)
+    - [オプション(ユーザエージェント)](#オプションユーザエージェント)
+    - [HTTP セッション](#http-セッション)
+  - [postgreSQL アクセス](#postgresql-アクセス)
+- [tsung でのレポート](#tsung-でのレポート)
+
+<!-- /code_chunk_output -->
+
+
 # 初めに
 
 このドキュメントは tsung を使って、自身が作った環境の負荷テストをするためのメモです
@@ -33,12 +56,19 @@ sudo yum install tsung
 
 tsung の詳細は [公式ドキュメント](http://tsung.erlang-projects.org/user_manual/) を参照します。
 
+**負荷をかけるコマンド**
+
+```
+tsung -l [ログフォルダ] -f [設定ファイル] start 
+```
+ログフォルダは、存在しない場合は自動で作成されます。
+
 ## 非分散負荷 (Client / Server)
 基本的な設定は以下の通りです。
 
 [公式ドキュメント 6.2 Clients and server](http://tsung.erlang-projects.org/user_manual/conf-client-server.html)
 
-```[xml]
+```xml
 <clients>
   <client host="localhost" use_controller_vm="true" />
 </clients>
@@ -54,7 +84,7 @@ type には `tcp`, `ssl`, `udp` が指定できます。例えば負荷を掛け
 
 [公式ドキュメント 6.4 Defining the load progression](http://tsung.erlang-projects.org/user_manual/conf-load.html)
 
-```
+```xml
   <load>
    <!-- 第１フェーズ -->
    <arrivalphase phase="1" duration="5" unit="minute">
@@ -84,7 +114,7 @@ type には `tcp`, `ssl`, `udp` が指定できます。例えば負荷を掛け
 - unit : second
 
 ### 第２フェーズ
-２つ目ののフェーズでは、`1分間の間`、`1秒に1000接続`、`最大1000000接続` します。
+２つ目ののフェーズでは、`1分間の間`、`1秒に1,000接続`、`最大100,000接続` します。
 
 #### arrivalphase
 
@@ -102,7 +132,8 @@ type には `tcp`, `ssl`, `udp` が指定できます。例えば負荷を掛け
 HTTP の接続テストでは仮想接続元のユーザエージェントを設定できます
 
 [※公式ドキュメント 6.5.13 HTTP options](http://tsung.erlang-projects.org/user_manual/conf-options.html#http-options)
-```
+
+```xml
   <options>
    <option type="ts_http" name="user_agent">
     <user_agent probability="80">Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.7.8) Gecko/20050513 Galeon/1.3.21</user_agent>
@@ -117,7 +148,7 @@ HTTP 接続テストの実際のパターンを設定します。
 
 [※公式ドキュメント 6.6.2 HTTP](http://tsung.erlang-projects.org/user_manual/conf-sessions.html#http)
 
-```
+```xml
  <sessions>
   <session name="http-example" probability="100" type="ts_http">
     <request> <http url="/" method="GET" version="1.1"></http> </request>
@@ -140,7 +171,7 @@ postgreSQL 接続テストの実際のパターンを設定します。
 
 [※公式ドキュメント 6.6.4 PostgreSQL](http://tsung.erlang-projects.org/user_manual/conf-sessions.html#postgresql)
 
-```
+```xml
  <sessions>
   <session name="pgsql-example" probability="100" type="ts_pgsql">
    <!-- 接続設定 -->
